@@ -1,7 +1,6 @@
 """Paper-trading ledger — the ONLY execution path until RESEARCH.md §9.4's
 Phase 2 custody bar is cleared (non-custodial, spend-capped wallet). No
-network calls, no real orders; a plain in-memory (optionally JSON-persisted)
-simulated portfolio.
+network calls, no real orders; a plain, JSON-persisted simulated portfolio.
 
 Execution rule, matching the blueprint paper exactly (RESEARCH.md §2.1):
 each action a_i in [-1, 1] is a fractional adjustment. Positive: buy that
@@ -9,11 +8,20 @@ fraction of the post-sell cash pool. Negative: sell that fraction of the
 current holding. All sells execute first; the resulting cash is then
 redistributed across positive actions, scaled down proportionally if their
 sum exceeds 1. A transaction cost is applied to every executed order.
+
+Persistence (`save`/`load`) exists specifically so a state-less, fresh
+session — a scheduled Claude Code Routine firing weekly, RESEARCH.md §6.7's
+"Claude Code" column, no separate ANTHROPIC_API_KEY involved — can pick up
+exactly where the previous week's session left off, the same "state lives
+in files, not in a conversation" pattern memory/rolling_memory.py already
+uses.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import json
+from dataclasses import asdict, dataclass, field
 from datetime import date
+from pathlib import Path
 
 
 @dataclass
@@ -51,6 +59,40 @@ class PaperLedger:
         self.transaction_cost_per_side = transaction_cost_per_side
         self.positions: dict[str, Position] = {}
         self.history: list[WeekResult] = []
+
+    def to_dict(self) -> dict:
+        return {
+            "cash": self.cash,
+            "transaction_cost_per_side": self.transaction_cost_per_side,
+            "positions": {t: asdict(p) for t, p in self.positions.items()},
+            "history": [asdict(w) for w in self.history],
+        }
+
+    def save(self, path: Path | str) -> None:
+        """Write full ledger state to a JSON file — call this at the end of
+        every tick. Atomic-ish: writes to a temp file then renames, so a
+        crash mid-write can't leave a half-written, unparseable ledger for
+        the next session to load."""
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        tmp.write_text(json.dumps(self.to_dict(), indent=2, sort_keys=True))
+        tmp.replace(path)
+
+    @classmethod
+    def load(cls, path: Path | str) -> "PaperLedger":
+        """Reconstruct a ledger from a file written by `save()`. Raises
+        FileNotFoundError if `path` doesn't exist yet — callers (e.g. a
+        Routine's first-ever firing) should catch that and construct a
+        fresh `PaperLedger(starting_cash_usd=...)` instead."""
+        data = json.loads(Path(path).read_text())
+        ledger = cls(
+            starting_cash_usd=data["cash"],
+            transaction_cost_per_side=data["transaction_cost_per_side"],
+        )
+        ledger.positions = {t: Position(**p) for t, p in data["positions"].items()}
+        ledger.history = [WeekResult(**w) for w in data["history"]]
+        return ledger
 
     def portfolio_value(self, prices: dict[str, float]) -> float:
         value = self.cash

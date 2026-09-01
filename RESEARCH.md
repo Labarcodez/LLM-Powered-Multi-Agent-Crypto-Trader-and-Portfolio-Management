@@ -23,7 +23,11 @@
 10. [Evaluation plan & backtesting frameworks](#10-evaluation-plan--backtesting-frameworks)
 11. [Phased roadmap](#11-phased-roadmap)
 12. [Gaps & what couldn't be verified](#12-gaps--what-couldnt-be-verified)
-13. [Sources](#13-sources)
+13. [Signal sources: social & on-chain intelligence](#13-signal-sources-social--on-chain-intelligence)
+14. [Statistical rigor: what the numbers really support](#14-statistical-rigor-what-the-numbers-really-support)
+15. [Multi-agent trust, consensus & architecture extensions](#15-multi-agent-trust-consensus--architecture-extensions)
+16. [Execution quality: order slicing](#16-execution-quality-order-slicing)
+17. [Sources](#17-sources)
 
 ---
 
@@ -49,6 +53,7 @@ The repository is a clean slate. That's good news — there's no legacy architec
 5. **Automate the safety net, not just the trading.** A dead-man switch, an out-of-band kill switch, and reconciling every trade against ground truth are what let "Claude does everything" survive a bad day without a human approving each trade (§8, §9).
 6. **Risk posture: aggressive, per direction.** Concentrated conviction bets, leverage on the table, wide drawdown tolerance — with circuit breakers re-purposed as malfunction detectors, not risk limiters. The market risk is the point; a bug or a drained key isn't (§9).
 7. **Treat the paper's numbers, and every other single data point in this document (including live-competition results), as hypotheses to verify on this project's own reproduced harness — not guarantees** (§3, §10).
+8. **Extend signal sources deliberately, and stay statistically honest about the result.** Social sentiment (LunarCrush/Santiment) and on-chain composite signals (MVRV/SOPR/exchange netflow) are well-evidenced additions beyond the paper's single news source — but a 2026 benchmark found only 32.5% of LLM-driven portfolio evaluations beat a naive equal-weight baseline, and this project's own eventual best config deserves a *deflated* Sharpe ratio, not just its raw headline number (§13–14).
 
 ---
 
@@ -497,7 +502,88 @@ A practical two-framework stack: **VectorBT for prototyping and the architecture
 
 ---
 
-## 13. Sources
+## 13. Signal sources: social & on-chain intelligence
+
+The blueprint paper (§2) used exactly one text source (Cointelegraph) and three market fields (price, volume, market cap). Real crypto markets — memecoins especially — are heavily driven by social sentiment and on-chain flows the paper never modeled. Extending the News Agent and Crypto Agent with these sources is a natural, evidence-backed upgrade beyond the paper's own scope, not a deviation from it.
+
+### 13.1 Social sentiment
+
+| Source | What it gives | Access |
+|---|---|---|
+| **LunarCrush** | Galaxy Score / AltRank composite metrics from X, Reddit, YouTube, TikTok — 2 trillion+ data points/year, bot-filtered, 4,000+ coins | REST API |
+| **Santiment** | Social + on-chain combined; "social dominance" measures what share of total crypto conversation a token commands — good for spotting narratives gaining traction early | API, paid tiers |
+| **Perception** | Media narrative tracking | API |
+| **Alternative.me Fear & Greed Index** | Simple market-wide sentiment gauge | **Free**, no key |
+
+A commonly cited professional stack pairs LunarCrush (social) + Santiment (on-chain behavior) + Perception (narrative) — three different lenses on the same underlying question rather than one tool trying to do everything.
+
+### 13.2 On-chain composite signals
+
+Beyond the paper's own price/volume/mcap, on-chain data (already reachable via the SQD MCP already attached to this session) supports a well-established composite-signal pattern:
+
+- **MVRV (Z-score)** — market value vs. realized value; identifies over/undervalued zones.
+- **SOPR** — Spent Output Profit Ratio; readings above 1 indicate profit-taking, below 1 signal loss realization.
+- **Exchange netflows / reserves vs. spot-ETF flows** — the 2026-era read is that ETF absorption of supply *while* exchange reserves decline indicates institutional buyers taking custody (bullish structural signal) rather than preparing to sell.
+- **Smart-money wallet tracking** — accumulation by known sophisticated wallets, cross-checked against exchange inflow spikes from large addresses.
+
+The standard composite rule: *MVRV in a high zone + declining SOPR + rising exchange inflows = elevated risk; MVRV in a low zone + SOPR below 1 + sustained outflows = accumulation signal.* This is directly analogous to the paper's own skill-augmented composite bullish count (§2.2) — an `onchain-signal-skill` alongside `crypto-signal-skill` (§5.1) would encode the same "several simple rules → one composite score" pattern the paper's winning configuration already validated, just fed by a different data layer.
+
+> These social and on-chain sources are exactly the kind of noisy, multi-source, sometimes-manufactured inputs §15's "uniform trust" warning is about — pump-and-dump groups routinely fabricate social volume. Read §13 and §15 together before wiring social sentiment into a live decision loop.
+
+## 14. Statistical rigor: what the numbers really support
+
+This section is the detailed backing for §2.6's "word on trusting these numbers" — three additional findings make the caution sharper, not softer.
+
+### 14.1 Most LLM portfolio strategies don't beat a coin flip on allocation
+
+["PortBench," Zhao, Chen & Su, arXiv:2605.27887](https://arxiv.org/abs/2605.27887) benchmarks ten frontier LLMs across six asset classes, 2015–2025, on a full decision pipeline (not just Q&A). Its central, sobering finding: **strong financial Q&A performance does not translate into superior portfolio performance — only 32.5% of 120 evaluations beat equal weighting on Sharpe ratio across four market periods.** PortBench also introduces **CEPS**, a metric quantifying how reasoning errors compound across pipeline stages — directly relevant to this project's own multi-stage Crypto→News→Trading pipeline (§2.1): an error in the Crypto Agent's signal doesn't just cost that agent's accuracy, it propagates and can compound through the Trading Agent's decision. Worth tracking a CEPS-style diagnostic in §10's evaluation harness, not just end-to-end returns.
+
+### 14.2 The deflated Sharpe ratio — why "the best of many configs" overstates itself
+
+When many strategy variants are tested and the best one's Sharpe ratio is reported, that number is inflated by selection bias: test enough configurations and *some* will look great by chance alone (Bailey & López de Prado, 2014). The blueprint paper tests 3 architectures × 4 capability configs × 3 model backbones — dozens of combinations — and reports Hierarchical+Skill's Sharpe of 1.50 as the winner among them (§2.4). That's exactly the scenario the deflated Sharpe ratio was built to correct for. **Practical takeaway for §10:** when this project runs its own architecture×capability grid, compute a deflated Sharpe for whichever configuration wins, rather than trusting the raw number — a config that looks best out of 12+ tested cells is a weaker claim than a config that was pre-specified and simply performed well.
+
+### 14.3 A live, fat-tailed illustration: the memecoin deployment
+
+["Hour-Aware Adaptive Risk Management for Autonomous Memecoin Trading on Solana DEXs," Kamat, arXiv:2606.08232](https://arxiv.org/abs/2606.08232) ran a 15-day, 190-trade live paper deployment on Solana DEXs — squarely in "aggressive" territory (§9). Headline numbers: 40.5% win rate, mean per-trade return +0.62%, **cumulative +117.7%**. Underneath that: skewness −1.21, excess kurtosis 6.61 — a heavy left tail — and **removing just the top 3 trades (1.6% of the sample) flips the entire result unprofitable.** That's the general shape of aggressive, fat-tailed strategies, not a flaw specific to this one paper: an impressive headline return resting on a handful of outlier wins is a fragile foundation, and §9's "circuit breakers as malfunction detectors, not loss limiters" framing exists precisely so a losing streak inside normal fat-tail variance isn't mistaken for a broken system.
+
+Two more findings from the same paper are worth carrying forward:
+- Its **rejection filter was validated**: of tokens the system declined to trade, 56.25% of a 48-event observed sub-sample went on to a 50%+ drawdown within six hours — good evidence that a well-built risk filter adds real value even in a fragile, high-variance environment, reinforcing §9.1's `portfolio-risk-skill` recommendation.
+- Its **time-of-day trading-edge hypothesis was *not* statistically confirmed** (Mann-Whitney p = 0.56) — a direct caution against over-fitting cadence decisions (§8.1's daily-vs-weekly question) to what may just be noise.
+
+The paper also ships fully reproducible artifacts (an assertion-based `audit.py`, MIT-licensed, with CC-BY-4.0 data) — a good practice to emulate once this project has its own live trade log (§8.2's reconciliation records are a natural fit for the same treatment).
+
+## 15. Multi-agent trust, consensus & architecture extensions
+
+### 15.1 The "uniform trust" bias, and how to design against it
+
+["TrustTrade," Li, Gonsalves, Li, Yoon & Wang, arXiv:2603.22567](https://arxiv.org/abs/2603.22567) names a specific failure mode: LLM trading agents tend to implicitly treat all retrieved information as equally factual, unlike human traders who selectively filter, cross-validate, and weight sources by experience. This is exactly the risk §13's social-sentiment sources introduce — crypto social volume is routinely manufactured by pump groups and bot networks, and a naively "trusting" News Agent would react to fabricated consensus as readily as organic sentiment.
+
+TrustTrade's mitigations, worth building directly into `news-sentiment-skill` (§5.1):
+
+1. **Cross-agent consistency weighting** — aggregate reads from multiple independent sources/agents and discount signals that are divergent, weakly grounded, or temporally inconsistent, rather than trusting each source uniformly.
+2. **Deterministic temporal anchors** — reproducible, non-LLM-generated reference points that stabilize the agent against hallucinated inconsistency.
+3. **Reflective memory** that adapts risk preference at test time without retraining — a natural fit for the Memory Store pattern in §6.5.
+
+Result in the paper's own backtests (high-noise 2024 Q1 and 2026 Q1 windows): trading behavior calibrated from extreme risk-return regimes toward a mid-risk, mid-return profile. Worth having in the toolkit as a tunable counterweight if the aggressive posture (§9) proves too noise-reactive once live.
+
+### 15.2 Structural lessons from CSTrader
+
+["CSTrader," Shi, Luo, Tang & Luo, arXiv:2606.31461](https://arxiv.org/abs/2606.31461) is a multi-agent language-grounded trading framework for a different (non-crypto) niche market — CS2 weapon skins — but its ablation results transfer as design lessons: alongside technical-analysis and sentiment agents, it found a **reversed-sentiment agent** (naive bullish-news-means-buy logic can be backwards in some regimes), a dedicated **liquidity agent**, and a dedicated **transaction-friction agent** were each independently critical to turning noisy language signals into stable profit — beyond the blueprint paper's original 3-agent split. Two of these map onto data this project already has (SQD/CCXT for liquidity depth; the same MCPs' fee schedules for friction) and are worth considering as additions to the Trading Agent's pre-trade checklist in a later phase, rather than new standalone agents from day one.
+
+### 15.3 Cross-provider ensembles — a heavier option, likely out of scope for now
+
+General ensemble research: combining independent models reduces variance when their errors are uncorrelated, but can *amplify* variance when member models differ substantially in reliability or calibration. Alpha Arena (§3.1) is a live demonstration of exactly how differently models actually behave — Qwen and DeepSeek profitable, Claude/Gemini/Grok/GPT all losing, by very different margins. A full multi-provider ensemble would add real cost and complexity, and sits outside this repo's Claude-centric mandate. The lighter-weight version already in the recommended architecture is the **Debate configuration itself (§7)** — two Claude-based agents cross-examining each other's evidence is a same-provider form of the same consensus mechanism, without multi-vendor overhead.
+
+## 16. Execution quality: order slicing
+
+Sizing a position (§9.2) and placing it are two different problems — the second matters more, not less, under §9.1's aggressive concentration cap (up to 100% in one high-conviction asset).
+
+- **TWAP** (Time-Weighted Average Price) splits an order into equal pieces over a fixed time window, ignoring volume. Best where liquidity is thin and a single large order risks a visible price jump — a documented real-world case showed a 7.5% execution improvement over VWAP on a low-liquidity DeFi token.
+- **VWAP** (Volume-Weighted Average Price) sizes pieces in proportion to market activity, filling more when the market is naturally more active. Best on liquid assets where matching the natural volume curve minimizes footprint.
+
+Both are standard order types on major exchanges and reachable through CCXT MCP (§5.3); a simple time-slicer is also easy to build directly. A dedicated `execution-slicing-skill`, paired with `portfolio-risk-skill`, is the natural place to encode this — gated behind the paper-ledger-to-live-wallet transition in §9.4/§11, since it only matters once real orders are actually hitting a real order book.
+
+## 17. Sources
 
 **Primary paper & related research**
 - Luo, Feng, Xu, Tasca & Liu, ["LLM-Powered Multi-Agent System for Automated Crypto Portfolio Management," arXiv:2501.00826v3](https://arxiv.org/abs/2501.00826)
@@ -508,12 +594,20 @@ A practical two-framework stack: **VectorBT for prototyping and the architecture
 - Kang, Zhang, Cai, Xu, Krishna, Du & Weissman, ["Win Fast or Lose Slow: Balancing Speed and Accuracy in Latency-Sensitive Decisions of LLMs," arXiv:2505.19481](https://arxiv.org/abs/2505.19481)
 - Mao, Wang, Liu, Zhu, Ma & Yan, ["SoK: Security of Autonomous LLM Agents in Agentic Commerce," arXiv:2604.15367](https://arxiv.org/abs/2604.15367)
 - Wu, ["When Errors Become Narratives: A Longitudinal Taxonomy of Silent Failures in a Production LLM Agent Runtime," arXiv:2606.14589](https://arxiv.org/abs/2606.14589)
+- Zhao, Chen & Su, ["PortBench: A Correlation-Aware, Full-Pipeline Benchmark for LLM-Driven Portfolio Management," arXiv:2605.27887](https://arxiv.org/abs/2605.27887)
+- Shi, Luo, Tang & Luo, ["CSTrader: A Testbed for Language-Grounded Trading in a Community-Driven Virtual Asset Market," arXiv:2606.31461](https://arxiv.org/abs/2606.31461)
+- Kamat, ["Hour-Aware Adaptive Risk Management for Autonomous Memecoin Trading on Solana DEXs," arXiv:2606.08232](https://arxiv.org/abs/2606.08232)
+- Li, Gonsalves, Li, Yoon & Wang, ["TrustTrade: Human-Inspired Selective Consensus Reduces Decision Uncertainty in LLM Trading Agents," arXiv:2603.22567](https://arxiv.org/abs/2603.22567)
 
 **Real-world evidence**
 - [Alpha Arena (Nof1.ai) — explained](https://www.datawallet.com/crypto/alpha-arena-nof1-ai-explained)
 - [Four out of six AI models suffer losses in trading tournament — ForkLog](https://forklog.com/en/four-out-of-six-ai-models-suffer-losses-in-trading-tournament/)
 - [Claude Portfolio: Up 19% vs S&P, But Who Trades? — explainx.ai](https://explainx.ai/blog/claude-portfolio-autopilot-ai-trading-experiment-august-2026)
 - [claudeportfolio.com/p/autopilot](https://www.claudeportfolio.com/p/autopilot)
+
+**Signal intelligence**
+- [LunarCrush](https://lunarcrush.com/) — social sentiment API, Galaxy Score/AltRank, 4,000+ coins
+- [Santiment](https://santiment.net/) — social + on-chain combined, "social dominance" narrative metric
 
 **Reference implementations**
 - [github.com/hugoguerrap/crypto-claude-desk](https://github.com/hugoguerrap/crypto-claude-desk)

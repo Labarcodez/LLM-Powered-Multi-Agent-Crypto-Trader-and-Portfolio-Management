@@ -1,0 +1,7 @@
+anthropic>=0.69,<1.0
+requests>=2.31
+numpy>=1.26
+pydantic>=2.7
+
+# dev/test only
+pytest>=8.0

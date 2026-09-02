@@ -1,0 +1,15 @@
+{
+  "2026-W36": {
+    "asset_signals": [
+      {
+        "confidence": 0.5,
+        "corroboration": "multi-source-consistent",
+        "rationale": "Three independent outlets this cycle: record August ETF net inflows with $80,000 flagged as key resistance (matching this week's actual 30-day high almost exactly), a Bitcoin Power Law piece on longer-horizon price targets, and a separate report on Wall-Street-era institutional investors showing signs of return. Consistent bullish institutional-flow theme across independent sources, though none is a this-week price catalyst on its own.",
+        "signal": 0.3,
+        "ticker": "BTC"
+      }
+    ],
+    "overall_rationale": "Two real, offsetting forces this cycle: a broad macro headwind (escalating U.S.-Iran tensions lifting crude oil and sovereign bond yields, explicitly reported as dragging cryptocurrencies into broad declines alongside other risk sectors -- single source but macro/geopolitical and consistent with the pullback visible in this week's own price data) against a multi-source-consistent bullish thread specifically on BTC (three independent outlets -- PANews, CoinPedia, Crypto Briefing -- all covering renewed institutional/Wall Street interest and ETF inflows). Roughly nets to a wash with a slight positive lean given the BTC corroboration. No ETH- or SOL-specific coverage this cycle.",
+    "overall_sentiment": 0.05
+  }
+}

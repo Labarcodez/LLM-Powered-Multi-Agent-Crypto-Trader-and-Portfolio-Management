@@ -1,0 +1,21 @@
+{
+  "cash": 100000.0,
+  "history": [
+    {
+      "actions_applied": {
+        "BTC": 0.0,
+        "ETH": 0.0,
+        "SOL": 0.0
+      },
+      "cash_end": 100000.0,
+      "iso_week": "2026-W36",
+      "portfolio_value_end": 100000.0,
+      "portfolio_value_start": 100000.0,
+      "positions_end": {},
+      "transaction_costs_paid": 0.0,
+      "weekly_return": 0.0
+    }
+  ],
+  "positions": {},
+  "transaction_cost_per_side": 0.001
+}

@@ -1,0 +1,25 @@
+{
+  "2026-W36": {
+    "actions": [
+      {
+        "action": 0.0,
+        "conviction": 0.4,
+        "rationale": "Crypto Agent and News Agent point in opposite directions at similar, moderate confidence: technicals lean bearish (short-term pullback) while news leans bullish (corroborated institutional-flow narrative, and $80k resistance is exactly where price topped this window). A genuine wash, not an absence of information -- no edge to act on with real capital. Sitting out is the considered call, not a default.",
+        "ticker": "BTC"
+      },
+      {
+        "action": 0.0,
+        "conviction": 0.3,
+        "rationale": "Same technical pullback-in-uptrend shape as BTC, no offsetting news signal -- falls back to the barely-positive overall sentiment. Weak signal either way. No entry.",
+        "ticker": "ETH"
+      },
+      {
+        "action": 0.0,
+        "conviction": 0.25,
+        "rationale": "Most balanced technical picture of the three (MACD turned bullish alongside the golden-cross) and the sharpest pullback off its own peak, but still no corroborating news and only a near-neutral crypto signal. Worth re-checking next tick if the MACD bullish cross holds or SOL-specific news appears.",
+        "ticker": "SOL"
+      }
+    ],
+    "portfolio_note": "First real tick: book opens and stays 100% cash ($100,000). All three assets are mid-pullback after a strong multi-week rally; BTC is the one asset with a genuine push-pull between bearish technicals and corroborated bullish news, which nets to sitting out rather than splitting the difference with a token position. No circuit breakers relevant on a fresh book. Re-evaluate fresh next week."
+  }
+}

@@ -44,3 +44,18 @@ done yet). Architecture: Hierarchical. Capability: Skill-augmented.
 Real entries appended by the Routine go below this line, oldest first.
 
 ---
+
+## 2026-W36 — tick 1
+
+**Prices:** BTC $77,411.00 · ETH $2,417.92 · SOL $99.97
+**Signals:** BTC crypto −0.30 / news +0.30 (multi-source-consistent) · ETH crypto −0.30 / no news (falls back to overall +0.05) · SOL crypto +0.05 / no news (falls back to overall +0.05)
+**Actions:** BTC 0.0 · ETH 0.0 · SOL 0.0 — BTC: bearish technicals vs. corroborated bullish news is a genuine wash, not a default no-signal; ETH/SOL: weak, non-corroborated signals, no entry.
+**Portfolio:** $100,000.00 → $100,000.00 (0.00%) · cash 100% · drawdown 0.00%
+**Circuit breakers:** none tripped (first tick, no prior history to measure drawdown against)
+
+First real firing of the self-bound weekly Routine (RESEARCH.md §6.7) — two
+earlier fresh-session attempts this same day failed to obtain push
+credentials and produced no ledger entry; see the git history around this
+commit for that trail. This tick ran live end-to-end: real CoinGecko data,
+real `composite_skill_signal` computation, real agent reasoning against the
+schemas in `crypto_desk/agents/`, real `PaperLedger`/`RollingMemory` state.

@@ -1,0 +1,24 @@
+{
+  "2026-W36": {
+    "signals": [
+      {
+        "confidence": 0.5,
+        "rationale": "1/4 indicators bullish (SLMA only) after a ~27.6% rally from $62.9k to a 30-day high of $80.3k; price has pulled back ~3.6% to $77.4k with SMA7, MACD and Bollinger all reading bearish. Reads as a short-term pullback inside an intact uptrend (golden-cross still holding), not a reversal -- moderate bearish lean, not high conviction.",
+        "signal": -0.3,
+        "ticker": "BTC"
+      },
+      {
+        "confidence": 0.5,
+        "rationale": "Identical pattern to BTC: 1/4 bullish (SLMA only), ~34.7% rally to a $2,515 high then a ~3.9% pullback to $2,417.67. Same pullback-in-an-uptrend read as BTC.",
+        "signal": -0.3,
+        "ticker": "ETH"
+      },
+      {
+        "confidence": 0.45,
+        "rationale": "Strongest technical picture of the three: 2/4 bullish (SLMA and MACD), vs BTC/ETH's 1/4. Sharpest rally (~48.5% to a $109.18 high) and sharpest pullback since (~8.4% to $99.97), but MACD turning bullish is a real positive divergence from the other two. Close to neutral -- not enough to call bullish outright, but clearly less bearish than BTC/ETH.",
+        "signal": 0.05,
+        "ticker": "SOL"
+      }
+    ]
+  }
+}

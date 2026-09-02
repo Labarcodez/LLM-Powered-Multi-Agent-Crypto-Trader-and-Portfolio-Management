@@ -136,10 +136,22 @@ Read this before assuming more works than actually does.
   deliberately only returns a `BreachEvent` — freezing a wallet, revoking a
   key, or paging a human has to live outside the trading loop's own control
   flow (RESEARCH.md §8.3, Fig. 3) and isn't wired to anything yet.
-- **No live 24/7 scheduling is wired up.** RESEARCH.md §6 and §8 document
-  Managed Agents (scheduled deployments, budgets, vault credentials) as the
-  production path and Claude Code Routines as the alternative — this repo
-  is the agent/backtest logic those would call, not the scheduler itself.
+- **Live 24/7 scheduling IS wired up, execution-path B.** A weekly Claude
+  Code Routine reasons directly as the three agents (Bash + this repo's
+  real code — no `ANTHROPIC_API_KEY`, ever) and paper-trades the full
+  15-asset universe every Monday, persisting state to `.agent-memory/` and
+  logging each tick to `examples/live_ticks.md`. See that file for the real
+  running history and RESEARCH.md §6.7/§9.5 for the design and its one hard
+  limitation found in practice: this workspace doesn't allow granting a
+  *fresh*, headless session push credentials or MCP connectors, so the
+  Routine is bound to a specific long-running session rather than spawning
+  a new one each week — documented there, not glossed over.
+- **Intended live-execution venue: Kraken** (RESEARCH.md §9.5) — still
+  paper-only. A Kraken MCP connector exists but isn't connected yet;
+  getting to a real order needs the user to create the account, complete
+  KYC, fund it, and generate a **trade-only** API key (no withdrawal scope)
+  — none of which Claude can do. §9.5 also has a live tradability
+  cross-check for the universe against Kraken's actual listings.
 
 None of this is hidden or a surprise if you've read `RESEARCH.md` — it's
 the roadmap in §11, Phases 1-2 done, the rest ahead of us.

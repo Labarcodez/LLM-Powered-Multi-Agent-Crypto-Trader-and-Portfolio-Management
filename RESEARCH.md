@@ -454,6 +454,47 @@ Neither is core to the paper's own design (which is long-only, directional, spot
 | Guarantee | The full loop — data in, agents reason, Trading Agent decides, ledger updates — runs risk-free until the backtest reproduces (or beats) the paper's numbers, and §8's reconciliation/watchdog/kill-switch trio all fire correctly in rehearsal | Caps are enforced by the wallet, not the agent's own good behavior. Claude never sees a raw private key. The kill switch's "freeze" action targets this wallet directly |
 | Aggressive-mode note | — | The cap's *existence* isn't negotiable; its *value* is set generously to match the mandate — this is also where leverage enters, sized and capped the same structural way as spot. On the Managed Agents path (§6.4), the credential itself is a vault `environment_variable` — the same guarantee, platform-enforced |
 
+### 9.5 Execution venue: Kraken
+
+Named by direct request (2026-09-02) as the intended Phase 2 execution
+venue, ahead of the custody work in §9.4 actually being built. Findings so
+far, so this section reflects verified information rather than assumption:
+
+- **A "Kraken MCP" connector exists in the workspace's MCP registry**
+  (found via a registry search this session) — not currently enabled in
+  this chat, tool list empty until connected. This is the natural
+  integration path once Phase 2 starts: prefer it over hand-rolling a raw
+  Kraken REST client, and build any adapter code against its *actual* tool
+  schema once enabled, not speculatively beforehand (the same discipline
+  this codebase already applies to CoinGecko/Twelve Data — never guess a
+  tool's shape).
+- **Universe tradability cross-check** (live web search, 2026-09-02, not
+  from training-data memory — exchange listings change too often to trust
+  stale knowledge here): of the 15 universe assets, 13 are mainstream,
+  long-standing Kraken listings (BTC, ETH, XRP, SOL, TRX, ADA, BCH, LTC,
+  SUI, AVAX, HBAR) or recent-but-live listings (BNB since a dedicated
+  listing announcement; HYPE spot since 2026-01-28). Two carry genuine
+  jurisdiction-dependent regulatory risk: **Monero (XMR)** is delisted on
+  Kraken for clients in the EEA (since Oct 2024), Canada, and India (both
+  Apr 2026); **Zcash (ZEC)** is delisted for India and UAE clients, with
+  further jurisdiction reviews ongoing for both assets. Neither affects
+  paper trading (§9.5 doesn't change what the weekly Routine does today —
+  see `examples/live_ticks.md`), but a live order for either must check
+  the connected account's actual jurisdiction/tradability first, not
+  assume universe membership implies tradability.
+- **What's needed from the user before any real order can exist**, and
+  cannot be done by Claude: creating the Kraken account, completing KYC,
+  funding it, and generating an API key. The one non-negotiable
+  recommendation for that key, regardless of how aggressive the trading
+  mandate is: **trade-only permissions, no withdrawal scope.** A key that
+  can trade but not withdraw caps the blast radius of a bug or a leaked
+  credential to "assets get reallocated badly," never "assets leave the
+  account" — the same "malfunction detector, not loss limiter" philosophy
+  as §9.1's circuit breakers, applied to the credential itself.
+- Sources: [Kraken's own cryptocurrency list](https://support.kraken.com/articles/360000678446-cryptocurrencies-available-on-kraken) (fetch blocked from this
+  session's network — could not verify directly, hence the per-asset web
+  search instead), [Kraken Monero EEA delisting notice](https://support.kraken.com/articles/notice-of-asset-delisting-in-ireland-and-belgium-for-monero-xmr), [Kraken India delistings notice (XMR, DASH, ZEC)](https://support.kraken.com/articles/asset-delistings-india), [Kraken UAE delistings notice](https://support.kraken.com/articles/notice-of-delistings-uae), [Kraken BNB listing coverage](https://finance.yahoo.com/news/kraken-exchange-confirms-binance-coin-122724613.html), [Kraken HYPE listing announcement](https://blog.kraken.com/product/asset-listings/hype-is-available-for-trading).
+
 ---
 
 ## 10. Evaluation plan & backtesting frameworks
@@ -487,7 +528,7 @@ A practical two-framework stack: **VectorBT for prototyping and the architecture
 | 2 — MVP desk | Crypto Agent + News Agent subagents, Hierarchical wiring, Skill-augmented signals, rolling K=4 memory, weekly paper-trading loop with a trade journal | Hierarchical+Skill config live on paper money |
 | 3 — Architecture A/B | Add Collaborative and Debate wiring plus the RAG memory store; run all four capability configs across all three architectures — the paper's 12-cell grid | Internal leaderboard vs. the paper's published numbers |
 | 4 — Unattended rehearsal | Stand up tiered-cadence Routines, the independent watchdog, ground-truth reconciliation, and the kill switch — still on paper money — deliberately break each one until it catches the break (§10.1, item 4) | A safety net proven to fire, not just designed to |
-| 5 — Guarded live pilot | Non-custodial spend-capped wallet, circuit breakers from §9.1, small real capital, kill switch wired to the real wallet | First live trade, fully reconciled and reversible in intent |
+| 5 — Guarded live pilot | Non-custodial spend-capped wallet or a Kraken account with a trade-only API key (§9.5), circuit breakers from §9.1, small real capital, kill switch wired to the real credential | First live trade, fully reconciled and reversible in intent |
 | 6 — Full 24/7 autonomy | Routine- or Deployment-scheduled ticks at the tiered cadence (§8.1), push-notified summaries every cycle, human on watch — not on the trigger | The desk this brief was asked for |
 
 ---

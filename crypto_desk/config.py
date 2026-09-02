@@ -35,6 +35,12 @@ UNIVERSE_TICKERS: dict[str, str] = {
     "hyperliquid": "HYPE", "monero": "XMR", "zcash": "ZEC", "litecoin": "LTC",
     "sui": "SUI", "avalanche-2": "AVAX", "hedera-hashgraph": "HBAR",
 }
+# Kraken tradability note (RESEARCH.md §9.5, intended Phase 2 execution
+# venue): 13 of these 15 are mainstream Kraken listings. XMR is delisted on
+# Kraken in the EEA/Canada/India; ZEC is delisted in India/UAE, with more
+# jurisdiction reviews ongoing for both. Irrelevant to paper trading — a
+# live-execution adapter must check the connected account's actual
+# tradability per asset, not assume universe membership implies it.
 
 
 class Architecture(str, Enum):

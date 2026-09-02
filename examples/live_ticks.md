@@ -22,10 +22,19 @@ BTC/ETH/SOL) was worked by hand in a sandbox with no CoinGecko/git access
 for the Routine itself, so it is **not** logged as an entry below; the
 Routine's own first real firing is entry 1.
 
-Universe for this log: **BTC, ETH, SOL** (a deliberate subset — see
-`crypto_desk/config.py`'s `UNIVERSE_TICKERS` for the full 15-asset
-universe; expanding this Routine to the full set is future work, not
-done yet). Architecture: Hierarchical. Capability: Skill-augmented.
+Universe for this log: **the full 15-asset universe** (`crypto_desk/config.py`'s
+`UNIVERSE_TICKERS` — BTC, ETH, BNB, XRP, SOL, TRX, ADA, BCH, HYPE, XMR, ZEC,
+LTC, SUI, AVAX, HBAR) as of the 2026-W37 tick onward. Tick 1 (2026-W36,
+below) ran BTC/ETH/SOL only, while the Routine mechanism itself was still
+being validated — see that entry and RESEARCH.md's execution-path section
+for why. Architecture: Hierarchical. Capability: Skill-augmented.
+
+**Intended eventual execution venue: Kraken** (paper-only for now — see
+README.md's "Current status & limitations"). Two universe assets have
+jurisdiction-dependent Kraken listings worth knowing about before Phase 2:
+Monero (XMR) is delisted on Kraken in the EEA, Canada, and India; Zcash
+(ZEC) is delisted in India and UAE, with more jurisdiction reviews ongoing
+for both as of this writing. Neither affects paper trading.
 
 ---
 
